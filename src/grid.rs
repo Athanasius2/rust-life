@@ -3,7 +3,7 @@ pub mod grid {
 use std::collections::BTreeSet;
 use std::collections::BTreeMap;
 
-pub type Cell = (i128, i128); //so I can easily change the size of my ints
+pub type Cell = (i32, i32); //will switch to generics later, but it's too painful for now
 
 pub struct Grid{
     cells: BTreeSet<Cell>
@@ -78,6 +78,10 @@ impl Grid{
     pub fn get_cells(&self) -> BTreeSet<Cell> {
         self.cells.clone()
     }
+    
+    pub fn clear_cells(&mut self) {
+        self.cells.clear();
+    }
 
     pub fn toggle_cell(&mut self, cell: Cell) {
         if !self.cells.insert(cell) { self.cells.remove(&cell); } 
@@ -88,17 +92,21 @@ impl Grid{
         let reduced = self.reducer(neighbor_counter);
 
         // Remove cells with less than 2 or more than 3 living neighbors.
-        self.cells = 
+        self.cells =
             reduced.iter()
-                .filter(|(_cell_coordinates, cell_neighbors)| { 
-                    cell_neighbors < &&2 || cell_neighbors > &&3
+                .filter(|(cell_coordinates, cell_neighbors)| { 
+                    (cell_neighbors == &&2 && self.cells.contains(&cell_coordinates)) || cell_neighbors == &&3
                 })
                 .map(|(key, _)| *key )
-                .collect();
+                .collect(); 
+
+        //println!("{:?}", neighbor_counter);
+        //println!("{:?}", reduced);
+        //println!("{:?}", self.cells);
     }
 
     pub fn iterative_compute(&mut self, iterations: i32) {
-        for _ in 0..iterations { self.compute(); }
+        (0..iterations).for_each( |_| self.compute());
     }
 }
 
